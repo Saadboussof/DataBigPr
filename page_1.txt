@@ -1,0 +1,45 @@
+ 
+TaaSim · Casablanca Urban Mobility 
+ENSA Al Hoceima — For Academic Use 
+Page  
+1.  Context & Problem Statement 
+ 
+ 
+Casablanca is the economic capital of Morocco and home to over 4 million inhabitants. Despite 
+significant investment in formal transit infrastructure — the BRT corridor along Boulevard 
+Mohammed VI, the ONCF suburban rail, and thousands of licensed taxis — urban mobility remains 
+deeply fragmented. The core problem is not a shortage of vehicles: it is the total absence of a data 
+layer connecting supply to demand. 
+ 
+Pain Point 
+Reality in Casablanca 
+No shared data layer 
+Grand taxis, petits taxis, and informal minibuses operate with no 
+GPS tracking, no digital booking, no shared schedule 
+Demand blindness 
+Drivers cruise looking for passengers; passengers wait with no 
+visibility of vehicle availability 
+No interoperability 
+Formal transit (ONCF, BRT) and informal taxis share no data, no 
+ticketing, no trip planner 
+Cash-only payments 
+Zero payment data means zero trip history, zero analytics, zero 
+personalization 
+Underserved periphery 
+New districts (Bouskoura, Ain Sebaâ, Sidi Moumen) grow faster 
+than routes are planned 
+ 
+TaaSim is a Transport-as-a-Service platform that treats urban mobility as a data engineering 
+problem. By ingesting GPS vehicle streams, processing citizen trip reservations in real time, and 
+applying batch analytics and machine learning to historical patterns, TaaSim can match riders to 
+vehicles dynamically, forecast demand surges, and give city planners a unified analytical view of 
+the mobility network. 
+ 
+🎓  Academic Framing 
+Each team is a startup co-founding a mobility platform for Casablanca. 
+The pipeline you build is your product — your competitive moat is the data you accumulate and 
+process. 
+Week 8 demo = seed-round investor pitch. Technical excellence + product thinking, both 
+required. 
+ 
+ 

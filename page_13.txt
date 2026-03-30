@@ -1,0 +1,90 @@
+ 
+TaaSim · Casablanca Urban Mobility 
+ENSA Al Hoceima — For Academic Use 
+Page  
+7.  Weekly Lab Plan 
+ 
+ 
+Each week delivers one working layer of the platform. By Week 5 the core end-to-end pipeline is 
+operational. Weeks 6 and 7 add intelligence and security hardening. Week 8 is the investor pitch 
+and live demo. 
+ 
+Wk 
+Theme 
+Engineering Tasks 
+Deliverables 
+W1 
+🗂️ 
+Setup & Data 
+Exploration 
+ Provision Docker Compose stack: 
+Kafka (KRaft), MinIO, Cassandra, 
+Flink, Spark, Grafana. 
+ Download Porto CSV (Kaggle) + 
+NYC TLC Parquet (3 months) → 
+upload to MinIO raw/. 
+ Explore Porto dataset in Jupyter: 
+schema, trip duration distribution, 
+call type breakdown, temporal 
+demand curve. 
+ Apply zone remapping (Porto → 
+Casablanca arrondissements) in 
+PySpark. Visualize on OSM map. 
+ Start GPS + trip request Kafka 
+producers. Verify events in Kafka 
+console consumer. 
+✓ Docker stack running 
+(screenshot). 
+✓ Jupyter data profiling 
+notebook. 
+✓ Zone-remapped trips 
+visualized on Casablanca 
+map. 
+✓ Team name + 1-slide 
+startup concept. 
+W2 
+🗂️ 
+Storage Design 
+ Finalize MinIO bucket structure: 
+raw/ curated/ ml/ kafka-archive/. 
+ Configure Kafka Connect S3 Sink 
+to mirror raw.gps and raw.trips to 
+MinIO kafka-archive/. 
+ Design Cassandra keyspace: 
+create vehicle_positions, trips, 
+demand_zones tables. Justify 
+partition keys. 
+ Write a 1-page Architecture 
+Decision Record (ADR) 
+documenting the storage and 
+architecture choices made. 
+✓ MinIO buckets receiving 
+data from Kafka. 
+✓ Cassandra schema 
+deployed + documented. 
+✓ ADR submitted 
+(architecture and storage 
+rationale). 
+W3 
+⚡ 
+Stream 
+Processing I — 
+GPS 
+ Implement Flink Job 1 (GPS 
+Normalizer): Kafka source, 
+coordinate validation, zone 
+mapping, watermark assignment 
+(3-min allowed lateness), sink to 
+Cassandra vehicle_positions. 
+ Test with injected late events: verify 
+watermark handles 3-min late GPS 
+correctly. 
+ Configure Flink checkpointing to 
+MinIO every 60 seconds. 
+✓ Flink Job 1 running with 
+checkpointing. 
+✓ Grafana shows live vehicle 
+positions. 
+✓ Watermark test: late event 
+handled correctly 
+(documented). 

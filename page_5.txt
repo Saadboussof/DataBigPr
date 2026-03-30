@@ -1,0 +1,64 @@
+ 
+TaaSim · Casablanca Urban Mobility 
+ENSA Al Hoceima — For Academic Use 
+Page  
+This separation of concerns — Flink for real-time, Spark for analytical depth — is a deliberate 
+architectural choice students must understand and articulate. 
+ 
+3.2  Architecture Diagram 
+  DATA SOURCES 
+  ┌─────────────────────────────────────────────────┐ 
+  │  Porto GPS Simulator  ·  Trip Request Simulator │ 
+  │  Porto Batch CSV      ·  NYC TLC Parquet (S3)   │ 
+  └────────────────┬────────────────────────────────┘ 
+                   │ 
+         ┌─────────▼──────────┐ 
+         │   Apache Kafka      │   ← 3 topics 
+         │  (KRaft, 1 broker)  │     raw.gps 
+         └──────┬──────┬───────┘     raw.trips 
+                │      │              processed.demand 
+        ┌───────▼──┐  ┌▼────────────────────────┐ 
+        │  Flink   │  │  Kafka → MinIO S3 Sink  │ 
+        │  3 Jobs  │  │  (raw zone archival)    │ 
+        └───┬──┬───┘  └─────────────────────────┘ 
+            │  │                    │ 
+       ETAs │  │ Demand         ┌───▼──────────┐ 
+            │  │ zones          │    MinIO     │ 
+            │  └──────────────► │  raw/        │ 
+            │                   │  curated/    │ 
+            │              Spark│  ml/         │ 
+            │            ◄──────┤              │ 
+            │                   └──────────────┘ 
+            │  Spark: ETL + MLlib demand forecast 
+            │                         │ 
+        ┌───▼─────────────────────────▼──────┐ 
+        │        Apache Cassandra             │ 
+        │  trips · positions · demand_forecast│ 
+        └─────────────────┬──────────────────┘ 
+                          │ 
+              ┌───────────▼───────────┐ 
+              │  FastAPI  +  Grafana   │ 
+              │  Live map · Heatmap    │ 
+              │  KPI dashboard · Demo  │ 
+              └───────────────────────┘ 
+ 
+3.3  Flink Processing Jobs 
+TaaSim's real-time pipeline is built around three focused Flink jobs, each responsible for a clearly 
+delimited processing concern: 
+ 
+Job 
+Input Topic 
+Processing Logic 
+Output 
+Job 1 
+GPS 
+Norm. 
+raw.gps 
+Validate coordinates · Remove 
+duplicates · Assign event-time 
+watermark (3-min allowed 
+lateness) · Map-match to Casablanca 
+zone grid 
+Cassandra: 
+vehicle_positions · K
+afka: processed.gps 

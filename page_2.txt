@@ -1,0 +1,53 @@
+ 
+TaaSim · Casablanca Urban Mobility 
+ENSA Al Hoceima — For Academic Use 
+Page  
+2.  Datasets 
+ 
+ 
+A critical real-world constraint: no public open dataset exists specifically for Casablanca taxi or 
+transport trips. Researchers studying Casablanca mobility have had to use Google Traffic API 
+scraping or smartphone GPS traces as a proxy — there is no official open data release. This is 
+itself an important lesson for students about data engineering in emerging markets. 
+ 
+TaaSim uses two well-established open academic datasets as proxies, and a lightweight simulation 
+layer to inject real-time stream behavior. Both datasets are freely available and widely used in 
+research. 
+ 
+2.1  Porto Taxi Trajectories — Primary Dataset 
+ 
+Attribute 
+Detail 
+Full name 
+Taxi Service Trajectory — ECML/PKDD 2015 Challenge Dataset 
+Source 
+UCI Machine Learning Repository + Kaggle (CC BY 4.0 — free for 
+academic use) 
+URL 
+https://www.kaggle.com/c/pkdd-15-predict-taxi-service-trajectory-i 
+Volume 
+~1.7 million completed taxi trips · ~1.5 GB compressed CSV 
+Time period 
+July 2013 – June 2014 (12 months) 
+Fleet size 
+442 taxis operating in Porto, Portugal 
+Key fields 
+TRIP_ID · CALL_TYPE · TAXI_ID · TIMESTAMP · POLYLINE (GPS 
+every 15 sec) · DAY_TYPE 
+CALL_TYPE 
+A = dispatched from central; B = picked up from taxi stand; C = street 
+hail 
+Why this dataset? 
+Call types A/B/C mirror exactly how Casablanca grand taxis and 
+petits taxis are hailed. Porto is a comparable mid-size city. Dataset is 
+the most-cited taxi trajectory dataset in academic ML research. 
+ 
+🎓  Casablanca Mapping Strategy 
+Porto's 22 city zones are remapped to Casablanca's 16 arrondissements (provided mapping 
+table in starter kit). 
+GPS coordinates are linearly transformed to fall within the Casablanca bounding box. 
+This gives students authentic trip-length distributions, demand curves, and temporal patterns — 
+without requiring a non-existent local dataset. 
+The remapping itself is a Week 1 data engineering task: students apply the transformation in 
+PySpark and validate the output visually on an OSM map. 
+ 

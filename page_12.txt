@@ -1,0 +1,25 @@
+ 
+TaaSim · Casablanca Urban Mobility 
+ENSA Al Hoceima — For Academic Use 
+Page  
+6.3  Security (Minimal Viable) 
+Requirement 
+Implementation 
+API Authentication 
+JWT tokens on all FastAPI endpoints. Two roles only: rider 
+(read + reserve) and admin (full access). Library: python-
+jose 
+GPS Anonymization 
+In Flink Job 1: snap raw lat/lon to zone centroid before 
+writing to Cassandra. Raw coordinates never persisted. 
+Kafka Topic ACLs 
+Producers may only write to raw.* topics. Flink jobs read 
+raw.* and write processed.*. Admin-only access to 
+processed.demand. 
+HTTPS on API 
+Self-signed certificate acceptable for demo (not 
+production). TLS termination at FastAPI with uvicorn --ssl-
+keyfile. 
+ 
+ 
+ 

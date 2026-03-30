@@ -1,0 +1,14 @@
+ 
+TaaSim · Casablanca Urban Mobility 
+ENSA Al Hoceima — For Academic Use 
+Page  
+ Moreira-Matias et al., 'Predicting Taxi-Passenger Demand Using Streaming Data' — 
+IEEE Trans. on Intelligent Transportation Systems, 2013. Directly uses the Porto 
+dataset.: ECML 2015 paper 
+ The Lean Startup — startup methodology, cold start problem, MVP thinking. Non-
+technical but required for entrepreneurial framing.: Ries, E. 
+ 
+ 
+TaaSim  ·  Advanced Big Data Capstone  ·  ENSA Al Hoceima  ·  2025–2026 
+"The best time to build the data infrastructure for Moroccan mobility was 10 years ago. The second best time is 
+now." 

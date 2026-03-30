@@ -1,0 +1,61 @@
+ 
+TaaSim · Casablanca Urban Mobility 
+ENSA Al Hoceima — For Academic Use 
+Page  
+9.  Technical Guidance & Resources 
+ 
+ 
+This section provides the key technical indications students need to build each component of the 
+platform. The guidance is intentionally directional — it points to the right approach and the key 
+decision points — but leaves the implementation to the team. This is what engineering judgment 
+means in practice. 
+ 
+9.1  Infrastructure Setup 
+Docker Compose Stack 
+All services must run via Docker Compose on a single workstation (8 GB RAM minimum). 
+Services to include: Kafka (KRaft mode — no Zookeeper), MinIO, Apache Cassandra, Apache 
+Flink (1 Job Manager + 1 Task Manager), Apache Spark (master + 1 worker), Grafana. 
+Key configuration points: Flink and Spark both need access to MinIO via the S3A connector 
+(hadoop-aws JAR + s3a:// paths). Cassandra needs its CQL port exposed. Grafana needs the 
+Cassandra datasource plugin installed. 
+Health check: verify each service with a simple client command before proceeding to Week 2 
+(kafka-topics.sh --list, mc ls, cqlsh, flink list, spark-shell, Grafana UI on port 3000). 
+ 
+9.2  Data Producers (Streaming Simulation) 
+Script to build 
+Purpose 
+Key implementation hints 
+vehicle_gps_producer.py 
+Replays Porto GPS 
+polylines through 
+Kafka topic raw.gps 
+at accelerated 
+speed 
+Read Porto POLYLINE field (JSON array of 
+[lon, lat] pairs). Iterate coordinates at 
+configurable speed (e.g. 10× real time). 
+Apply coordinate transform: map Porto 
+bounding box linearly to Casablanca 
+bounding box (provided in 
+zone_mapping.csv). 
+Add noise: Gaussian jitter (σ ≈ 0.0002 
+degrees ≈ 20m). With 5% probability per 
+vehicle per event, delay the Kafka send by 
+60–180 seconds to simulate blackouts. 
+Kafka message key = taxi_id. Payload fields: 
+taxi_id, timestamp (event time), lat, lon, 
+speed, status. 
+trip_request_producer.py 
+Generates citizen 
+reservation events 
+following Porto's 
+demand curve on 
+Kafka topic raw.trips 
+Compute a demand multiplier per hour from 
+the Porto dataset (aggregate trips by hour → 
+normalize). Apply this curve to control event 
+emission rate. 
+Each event: trip_id (UUID), rider_id, 
+origin_zone, destination_zone, requested_at 
+(event time), call_type (A/B/C from Porto 
+CALL_TYPE). 

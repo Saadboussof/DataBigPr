@@ -1,0 +1,62 @@
+ 
+TaaSim · Casablanca Urban Mobility 
+ENSA Al Hoceima — For Academic Use 
+Page  
+5.  Spark ML Pipeline — Demand Forecasting 
+ 
+ 
+The ML component transforms TaaSim from a reactive dispatcher into a proactive platform. It is 
+implemented in PySpark (MLlib) and trained on the cleaned Porto + NYC historical data. Scope is 
+deliberately constrained: one model, one evaluation, one serving endpoint. 
+ 
+5.1  Problem Definition 
+Element 
+Definition 
+Prediction target 
+Number of trip requests per city zone over the next 30-minute time 
+slot 
+Prediction horizon 
+30 minutes ahead 
+Granularity 
+Per Casablanca arrondissement (16 zones) × per 30-min slot 
+Algorithm 
+Gradient Boosted Trees regressor — Spark MLlib GBTRegressor 
+Training data 
+12 months Porto remapped trips (1.7M rows) + feature engineering 
+Baseline to beat 
+Naive model: predict same slot from 7 days ago (students must 
+beat this) 
+ 
+5.2  Feature Set (Kept Simple) 
+Feature Group 
+Features 
+Engineering Step 
+Temporal 
+hour_of_day (0–23) · day_of_week (0–
+6) · is_weekend · is_friday 
+Extracted from 
+TIMESTAMP in Spark 
+Spatial 
+zone_id (1–
+16) · zone_population_density · zone_typ
+e (residential / commercial / transit_hub) 
+Joined from provided zone 
+reference table 
+Weather 
+is_raining (binary) · temperature_bucket 
+(cold/mild/hot) 
+Joined from Open-Meteo 
+historical API 
+Lag 
+demand_lag_1d · demand_lag_7d · rollin
+g_7d_mean 
+Window functions over trip 
+history in Spark 
+ 
+5.3  Training & Serving Steps 
+ Spark job reads curated/trips/, computes all features, writes feature matrix to 
+ml/features/: Step 1 — Feature engineering 
+ First 10 months = training, last 2 months = test. Temporal split — no data leakage: Step 
+2 — Train/test split 
+ GBTRegressor with maxDepth=5, maxIter=50. CrossValidator over 2 parameters only 
+(not full grid search — time constraint): Step 3 — Model training 

@@ -1,0 +1,18 @@
+# Data files to ignore (Huge files)
+data/*.csv
+!data/zone_mapping.csv
+data/*.parquet*
+data/*_parquet/
+data/curated/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# OS generated files
+.DS_Store
+Thumbs.db

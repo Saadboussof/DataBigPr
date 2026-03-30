@@ -1,0 +1,85 @@
+ 
+TaaSim · Casablanca Urban Mobility 
+ENSA Al Hoceima — For Academic Use 
+Page  
+4.  Data Model — Cassandra Schema 
+ 
+ 
+Cassandra tables are designed around query patterns, not normalization. Students must 
+understand this fundamental NoSQL design principle and justify every partition key choice in their 
+technical report. The following three tables are the minimum required. 
+ 
+4.1  Required Tables 
+Table 
+Partition Key 
+Clustering Key 
+Key Fields 
+Primary 
+Query 
+vehicle_position
+s 
+(city, zone_id) 
+event_time 
+DESC 
+taxi_id · lat · lon · s
+peed · status 
+Nearest 
+available 
+vehicles in 
+zone 
+trips 
+(city, date_bucket) 
+created_at DESC 
+trip_id · rider_id · t
+axi_id · origin_zon
+e · dest_zone · stat
+us · fare 
+Trip history 
+by day 
+demand_zones 
+(city, zone_id) 
+window_start 
+DESC 
+active_vehicles · p
+ending_requests · 
+ratio · forecast_de
+mand 
+Live 
+demand 
+heatmap 
+per zone 
+ 
+🎓  Partition Key Design — What students must justify 
+Why (city, zone_id) and not just taxi_id for vehicle_positions? Answer: the API queries 'all 
+vehicles in zone X', not 'all trips by taxi Y'. Partition by query pattern. 
+Why date_bucket in trips? Answer: unbounded partition growth. Without bucketing by day/week, 
+one partition accumulates millions of rows and causes hotspots. 
+Students who copy this schema without understanding it will not survive Q&A in Week 8. 
+ 
+4.2  MinIO Bucket Structure 
+Bucket / Prefix 
+Contents 
+Written by 
+Read by 
+raw/porto-trips/ 
+Raw Porto CSV files as 
+downloaded 
+Manual (Week 
+1) 
+Spark ETL 
+raw/nyc-tlc/ 
+NYC TLC Parquet files (3 
+months) 
+Manual (Week 
+1) 
+Spark ETL 
+raw/kafka-archive/ 
+Kafka S3 Sink mirror of all 
+topics 
+Kafka Connect 
+Spark ETL 
+curated/trips/ 
+Cleaned + geo-enriched 
+trips (Parquet) 
+Spark ETL 
+Spark ML 

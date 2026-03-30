@@ -1,0 +1,56 @@
+ 
+TaaSim · Casablanca Urban Mobility 
+ENSA Al Hoceima — For Academic Use 
+Page  
+Wk 
+Theme 
+Engineering Tasks 
+Deliverables 
+W7 
+🗂️ 
+Security + 
+Integration 
+ Add JWT authentication to 
+FastAPI: rider and admin roles. 
+Test with curl. 
+ Implement GPS anonymization in 
+Flink Job 1: snap coordinates to 
+zone centroid. 
+ Full integration test: run all 3 Flink 
+jobs + Spark ETL + API 
+simultaneously for 30 minutes. 
+ Measure all SLA targets from 
+Section 6.1. Record results for 
+technical report. 
+ Kill Flink task manager manually → 
+verify job recovers from checkpoint. 
+✓ JWT auth working on all 
+endpoints. 
+✓ SLA measurement table 
+completed. 
+✓ Checkpoint recovery 
+demonstrated (screen 
+recording). 
+W8 
+🗂️ 
+Demo + 
+Investor Pitch 
+ Polish Grafana dashboard: vehicle 
+map, demand heatmap, trip funnel, 
+ML forecast vs actual. 
+ Rehearse live demo script: inject 
+morning rush → demand spike 
+from event_injector → show trip 
+matches + heatmap response. 
+ Prepare 10-slide pitch deck: 
+Problem · Solution · Architecture · 
+Live Demo · Metrics · Business 
+model · Team. 
+ Finalize technical report (12–15 
+pages). 
+✓ Live 20-minute demo + 10-
+min Q&A. 
+✓ Technical report submitted. 
+✓ Pitch deck submitted. 
+ 
+ 

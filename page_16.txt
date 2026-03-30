@@ -1,0 +1,79 @@
+ 
+TaaSim · Casablanca Urban Mobility 
+ENSA Al Hoceima — For Academic Use 
+Page  
+8.  Evaluation Rubric 
+ 
+ 
+Evaluation is designed so that a team of 2 working consistently can achieve a good result. 
+Distinction requires both technical depth and entrepreneurial clarity. The live demo is non-
+negotiable — a pipeline that does not run on Demo Day cannot pass the pipeline pillar. 
+ 
+Pillar 
+Weig
+ht 
+Passing Level 
+Distinction Level 
+Pipeline Completeness 
+30% 
+All 3 Flink jobs running; 
+Spark ETL completes; 
+Cassandra tables populated; 
+trips can be reserved via 
+API. 
+All SLA targets from §6.1 
+met and measured. 
+Checkpoint recovery 
+demonstrated. Anomaly 
+injection handled gracefully. 
+Engineering Quality 
+25% 
+Flink checkpointing 
+configured; GPS 
+anonymization implemented; 
+JWT auth on API; Kappa vs 
+Lambda justified in report. 
+Partition key choices justified 
+with query benchmarks. 
+Watermark strategy 
+explained with late-event 
+evidence. ADRs for all major 
+decisions. 
+Technical Report (12–
+15p) 
+25% 
+Architecture described. 
+Dataset remapping 
+documented. ML evaluation 
+includes baseline 
+comparison. 
+Honest post-mortem on 
+failures. Feature importance 
+explained in business terms. 
+NFR measurement table 
+included. 
+Startup Pitch + Demo 
+20% 
+Pipeline runs live. Team 
+explains every component 
+when asked. Business model 
+is coherent. 
+Demand spike injected live 
+and handled visibly. Pitch is 
+compelling to a non-
+technical observer. Team 
+defends tradeoffs under 
+pressure. 
+ 
+8.1  Minimum Viable Pipeline — Demo Day Checklist 
+✅  The 5 things that must work on Demo Day 
+1.  GPS events flowing: Kafka → Flink Job 1 → Cassandra → Grafana vehicle position map 
+(updating live). 
+2.  Trip reservation: POST /api/trips → Flink Job 3 match → trip record in Cassandra with ETA < 
+5 seconds. 
+3.  Demand heatmap: Flink Job 2 → Cassandra demand_zones → Grafana heatmap updating 
+every 30 seconds. 
+4.  ML forecast: Spark-trained model → FastAPI /demand/forecast responding in < 500ms. 
+5.  Anomaly visible: event_injector.py demand spike → heatmap shows surge zone within 60 
+seconds. 
+ 
