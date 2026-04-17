@@ -4,6 +4,12 @@ data/*.csv
 data/*.parquet*
 data/*_parquet/
 data/curated/
+data/*.torrent
+data/*.crdownload
+data/*.part
+
+# Generated notebook/map artifacts
+notebooks/*.html
 
 # Jupyter Notebook checkpoints
 .ipynb_checkpoints/
