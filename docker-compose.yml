@@ -9,14 +9,37 @@ services:
     environment:
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: broker,controller
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      # Two listeners: INTERNAL for Docker containers, EXTERNAL for Windows host
+      KAFKA_LISTENERS: INTERNAL://0.0.0.0:29092,EXTERNAL://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:29092,EXTERNAL://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
       CLUSTER_ID: LelM2dIFQkiUFvXCEcqRWA
+      KAFKA_LOG_RETENTION_HOURS: 168          # 7 days retention
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false" # We create topics explicitly
     volumes:
       - kafka_data:/var/lib/kafka/data
+
+  # ── 1b. Kafka topic initializer (runs once then exits) ────────────────
+  kafka-init:
+    image: apache/kafka:3.7.0
+    container_name: taasim-kafka-init
+    depends_on:
+      - kafka
+    entrypoint: >
+      /bin/sh -c "
+      echo 'Waiting for Kafka to be ready...';
+      sleep 15;
+      /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --create --if-not-exists --topic raw.gps          --partitions 4 --replication-factor 1;
+      /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --create --if-not-exists --topic raw.trips        --partitions 4 --replication-factor 1;
+      /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --create --if-not-exists --topic processed.gps    --partitions 4 --replication-factor 1;
+      /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --create --if-not-exists --topic processed.demand --partitions 4 --replication-factor 1;
+      /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --create --if-not-exists --topic processed.matches --partitions 4 --replication-factor 1;
+      echo '✅ All 5 Kafka topics created successfully.';
+      /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --list;
+      "
 
   # ── 2. MinIO (S3-compatible Object Storage) ───────────────────────────
   minio:
@@ -59,6 +82,23 @@ services:
       CASSANDRA_CLUSTER_NAME: TaaSimCluster
     volumes:
       - cassandra_data:/var/lib/cassandra
+
+  # ── 3b. Cassandra schema initializer (runs once then exits) ───────────
+  cassandra-init:
+    image: cassandra:4.1
+    container_name: taasim-cassandra-init
+    depends_on:
+      - cassandra
+    volumes:
+      - ./src/cassandra_schema.cql:/schema.cql
+    entrypoint: >
+      /bin/sh -c "
+      echo 'Waiting for Cassandra to be ready...';
+      sleep 40;
+      cqlsh cassandra 9042 -f /schema.cql;
+      echo '✅ Cassandra schema applied!';
+      cqlsh cassandra 9042 -e 'DESCRIBE KEYSPACE taasim;';
+      "
 
   # ── 4. Apache Flink ───────────────────────────────────────────────────
   flink-jobmanager:
@@ -121,7 +161,27 @@ services:
     depends_on:
       - spark-master
 
-  # ── 7. Grafana ────────────────────────────────────────────────────────
+  # ── 7. Kafka-to-MinIO Archiver ────────────────────────────────────────
+  # Lightweight Python consumer that mirrors raw.gps and raw.trips
+  # to MinIO kafka-archive/ bucket (replaces heavy Confluent Connect)
+  kafka-archiver:
+    build:
+      context: ./src/archiver
+      dockerfile: Dockerfile
+    container_name: taasim-kafka-archiver
+    depends_on:
+      - kafka
+      - minio
+    environment:
+      KAFKA_BROKER: kafka:29092
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_ACCESS_KEY: admin
+      MINIO_SECRET_KEY: password
+      MINIO_BUCKET: kafka-archive
+      TOPICS: "raw.gps,raw.trips"
+    restart: unless-stopped
+
+  # ── 8. Grafana ────────────────────────────────────────────────────────
   grafana:
     image: grafana/grafana:latest
     container_name: taasim-grafana
