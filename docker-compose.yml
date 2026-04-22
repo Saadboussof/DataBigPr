@@ -102,7 +102,7 @@ services:
 
   # ── 4. Apache Flink ───────────────────────────────────────────────────
   flink-jobmanager:
-    image: flink:1.18-java11
+    build: ./src/flink
     container_name: taasim-flink-jm
     ports:
       - "8081:8081"
@@ -111,9 +111,11 @@ services:
       - |
         FLINK_PROPERTIES=
         jobmanager.rpc.address: flink-jobmanager
+    volumes:
+      - ./src/flink:/opt/flink/usrlib
 
   flink-taskmanager:
-    image: flink:1.18-java11
+    build: ./src/flink
     container_name: taasim-flink-tm
     depends_on:
       - flink-jobmanager
@@ -123,6 +125,8 @@ services:
         FLINK_PROPERTIES=
         jobmanager.rpc.address: flink-jobmanager
         taskmanager.numberOfTaskSlots: 2
+    volumes:
+      - ./src/flink:/opt/flink/usrlib
 
   # ── 5. Apache Spark ───────────────────────────────────────────────────
   spark-master:
