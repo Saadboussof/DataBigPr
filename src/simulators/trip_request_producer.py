@@ -8,6 +8,36 @@ from datetime import datetime
 # 16 Arrondissements in Casablanca
 NUM_ZONES = 16
 
+# Casablanca bounding box (must match gps_job.py and vehicle_gps_producer.py)
+CASA_LON_MIN, CASA_LON_MAX = -7.80, -7.40
+CASA_LAT_MIN, CASA_LAT_MAX = 33.40, 33.70
+GRID_COLS, GRID_ROWS = 4, 4
+
+def zone_to_random_point(zone_id):
+    """
+    Convert a zone_id (1-16) into a random lat/lon inside that zone's grid cell.
+    
+    The grid is 4×4:
+      Zone 1  = bottom-left   (grid_x=0, grid_y=0)
+      Zone 16 = top-right     (grid_x=3, grid_y=3)
+    
+    Formula (reverse of gps_job.py):
+      grid_x = (zone_id - 1) % 4
+      grid_y = (zone_id - 1) // 4
+    """
+    grid_x = (zone_id - 1) % GRID_COLS
+    grid_y = (zone_id - 1) // GRID_COLS
+
+    # Width/height of one cell
+    cell_w = (CASA_LON_MAX - CASA_LON_MIN) / GRID_COLS   # 0.10 degrees
+    cell_h = (CASA_LAT_MAX - CASA_LAT_MIN) / GRID_ROWS   # 0.075 degrees
+
+    # Random point inside the cell
+    lon = CASA_LON_MIN + (grid_x + random.random()) * cell_w
+    lat = CASA_LAT_MIN + (grid_y + random.random()) * cell_h
+
+    return round(lat, 6), round(lon, 6)
+
 def get_demand_multiplier(current_hour):
     """Simulates peak demand hours (7-9 AM, 5-7 PM)."""
     if 7 <= current_hour <= 9:
@@ -28,14 +58,22 @@ def generate_request():
     dest = random.randint(1, NUM_ZONES)
     while dest == origin:
         dest = random.randint(1, NUM_ZONES)
-        
+
+    # Generate exact GPS coordinates for the passenger's pickup and dropoff
+    origin_lat, origin_lon = zone_to_random_point(origin)
+    dest_lat, dest_lon = zone_to_random_point(dest)
+
     return {
         "trip_id": str(uuid.uuid4()),
         "rider_id": f"rider_{random.randint(1000, 9999)}",
         "origin_zone": origin,
         "destination_zone": dest,
+        "origin_lat": origin_lat,
+        "origin_lon": origin_lon,
+        "dest_lat": dest_lat,
+        "dest_lon": dest_lon,
         "requested_at": int(time.time() * 1000),
-        "call_type": random.choice(["A", "B", "C"]) # A: Central, B: Stand, C: Hail
+        "call_type": random.choice(["A", "B", "C"])  # A: Central, B: Stand, C: Hail
     }
 
 def main(broker):
