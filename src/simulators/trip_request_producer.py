@@ -8,9 +8,9 @@ from datetime import datetime
 # 16 Arrondissements in Casablanca
 NUM_ZONES = 16
 
-# Casablanca bounding box (must match gps_job.py and vehicle_gps_producer.py)
-CASA_LON_MIN, CASA_LON_MAX = -7.80, -7.40
-CASA_LAT_MIN, CASA_LAT_MAX = 33.40, 33.70
+# Casablanca bounding box (from OSMnx road network — matches all other files)
+CASA_LON_MIN, CASA_LON_MAX = -7.6895, -7.4008
+CASA_LAT_MIN, CASA_LAT_MAX = 33.5072, 33.6527
 GRID_COLS, GRID_ROWS = 4, 4
 
 def zone_to_random_point(zone_id):

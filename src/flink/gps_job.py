@@ -21,9 +21,9 @@ from pyflink.common.serialization import SimpleStringSchema
 from pyflink.common.typeinfo import Types
 from pyflink.datastream.functions import MapFunction
 
-# --- Casablanca Boundaries (must match the simulator constants) ---
-CASA_LON_MIN, CASA_LON_MAX = -7.80, -7.40
-CASA_LAT_MIN, CASA_LAT_MAX = 33.40, 33.70
+# --- Casablanca Boundaries (from OSMnx road network — matches all other files) ---
+CASA_LON_MIN, CASA_LON_MAX = -7.6895, -7.4008
+CASA_LAT_MIN, CASA_LAT_MAX = 33.5072, 33.6527
 
 # ═══════════════════════════════════════════════════════════════════
 # Watermark: Custom TimestampAssigner
