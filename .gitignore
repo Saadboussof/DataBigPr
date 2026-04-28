@@ -1,9 +1,11 @@
-# Data files to ignore (Huge files)
+# Data files to ignore (Huge files and caches)
 data/*.csv
 !data/zone_mapping.csv
 data/*.parquet*
 data/*_parquet/
 data/curated/
+data/road_cache/
+data/mapped/
 data/*.torrent
 data/*.crdownload
 data/*.part
