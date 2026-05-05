@@ -94,17 +94,26 @@ def main():
     minio_client = create_minio_client()
     ensure_bucket(minio_client, MINIO_BUCKET)
 
-    # Initialize Kafka consumer
+    from kafka import TopicPartition
+    
+    # Initialize Kafka consumer WITHOUT a group_id to bypass the KRaft bug
     consumer = KafkaConsumer(
-        *TOPICS,
         bootstrap_servers=[KAFKA_BROKER],
-        group_id="taasim-archiver",
         auto_offset_reset="earliest",
         value_deserializer=lambda m: json.loads(m.decode("utf-8")),
-        consumer_timeout_ms=1000,  # Return after 1s of no messages
     )
+    
+    # We know from docker-compose that there are 4 partitions per topic (0, 1, 2, 3)
+    partitions = []
+    for topic in TOPICS:
+        for p in range(4):
+            partitions.append(TopicPartition(topic, p))
+            
+    # Manually assign and seek to beginning
+    consumer.assign(partitions)
+    consumer.seek_to_beginning()
 
-    print(f"Connected to Kafka. Listening on topics: {TOPICS}")
+    print(f"Connected to Kafka. Listening on topics: {TOPICS}", flush=True)
 
     # Per-topic batches
     batches = {topic: [] for topic in TOPICS}
@@ -113,20 +122,24 @@ def main():
 
     while True:
         try:
-            # Poll for messages (returns within 1 second if no data)
-            for message in consumer:
-                topic = message.topic
-                if topic not in batches:
-                    batches[topic] = []
-                    counters[topic] = 1
+            # Use poll() instead of iterator for robust timeout handling
+            records = consumer.poll(timeout_ms=1000)
+            
+            if records:
+                for topic_partition, messages in records.items():
+                    topic = topic_partition.topic
+                    if topic not in batches:
+                        batches[topic] = []
+                        counters[topic] = 1
 
-                batches[topic].append(message.value)
+                    for message in messages:
+                        batches[topic].append(message.value)
 
-                # Flush if batch is full
-                if len(batches[topic]) >= BATCH_SIZE:
-                    counters[topic] = flush_batch(minio_client, topic, batches[topic], counters[topic])
-                    batches[topic] = []
-                    last_flush = time.time()
+                    # Flush if batch is full
+                    if len(batches[topic]) >= BATCH_SIZE:
+                        counters[topic] = flush_batch(minio_client, topic, batches[topic], counters[topic])
+                        batches[topic] = []
+                        last_flush = time.time()
 
             # Time-based flush (every FLUSH_INTERVAL_SEC)
             if time.time() - last_flush >= FLUSH_INTERVAL_SEC:
@@ -137,7 +150,7 @@ def main():
                 last_flush = time.time()
 
         except Exception as e:
-            print(f"Error: {e}. Retrying in 5s...")
+            print(f"Error: {e}. Retrying in 5s...", flush=True)
             time.sleep(5)
 
 

@@ -259,6 +259,31 @@ def main(input_csv, output_dir, limit):
     df[["TAXI_ID", "CASA_POLYLINE"]].to_parquet(out, index=False)
     print(f"  → {out}")
 
+    # Phase 5: Upload to MinIO (Curated Bucket)
+    print(f"\n[5/5] Uploading to MinIO (curated bucket)...")
+    try:
+        from minio import Minio
+        # Connect to MinIO (assuming script runs on Windows host)
+        minio_client = Minio(
+            "localhost:9000",
+            access_key="admin",
+            secret_key="password",
+            secure=False
+        )
+        
+        if not minio_client.bucket_exists("curated"):
+            minio_client.make_bucket("curated")
+            
+        object_name = "porto/casa_trips_road_snapped.parquet"
+        minio_client.fput_object("curated", object_name, out)
+        print(f"  ✅ Uploaded to s3://curated/{object_name}")
+        
+    except ImportError:
+        print("  [!] Skipping MinIO upload. 'minio' python package not installed.")
+        print("  [!] To enable auto-upload, run: pip install minio")
+    except Exception as e:
+        print(f"  [!] Failed to upload to MinIO: {e}")
+
     print(f"\n{'='*60}")
     print(f"  DONE in {time.time()-t0:.1f}s — {len(df)} road-snapped trips")
     print(f"{'='*60}")
