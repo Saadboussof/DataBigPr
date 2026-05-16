@@ -24,3 +24,6 @@ __pycache__/
 # OS generated files
 .DS_Store
 Thumbs.db
+
+# Soufiane's plans to ignore
+Soufiane_plans/*

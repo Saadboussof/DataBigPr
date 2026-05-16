@@ -118,7 +118,7 @@ def main():
 
     # ── 1. Streaming Environment ──
     env = StreamExecutionEnvironment.get_execution_environment()
-    env.set_parallelism(2)
+    env.set_parallelism(1)
 
     # ── 2. Checkpointing: save Flink state every 60 seconds ──
     # If the job crashes, Flink can restart from the last checkpoint
