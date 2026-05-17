@@ -25,6 +25,7 @@ CREATE KEYSPACE IF NOT EXISTS taasim
 CREATE TABLE IF NOT EXISTS taasim.vehicle_positions (
   city        TEXT,
   zone_id     INT,
+  zone_name   TEXT,       -- Real arrondissement name (e.g., 'Anfa', 'Hay Hassani')
   event_time  TIMESTAMP,
   taxi_id     TEXT,
   lat         DOUBLE,
@@ -79,6 +80,7 @@ CREATE TABLE IF NOT EXISTS taasim.trips (
 CREATE TABLE IF NOT EXISTS taasim.demand_zones (
   city              TEXT,
   zone_id           INT,
+  zone_name         TEXT,       -- Real arrondissement name (e.g., 'Anfa', 'Hay Hassani')
   window_start      TIMESTAMP,
   active_vehicles   INT,        -- Supply: how many taxis are in this zone
   pending_requests  INT,        -- Demand: how many ride requests are pending

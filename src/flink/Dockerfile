@@ -8,8 +8,8 @@ RUN apt-get update -y && \
     ln -s /usr/bin/python3.10 /usr/bin/python && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Install PyFlink and the Cassandra Driver for Python (so the Job runs flawlessly)
-RUN pip3 install --no-cache-dir apache-flink==1.18.0 cassandra-driver
+# Install PyFlink, Cassandra Driver, and Shapely (for polygon zone lookup)
+RUN pip3 install --no-cache-dir apache-flink==1.18.0 cassandra-driver shapely
 
 # Create directories for external jars
 RUN mkdir -p /opt/flink/usrlib
@@ -18,6 +18,9 @@ RUN mkdir -p /opt/flink/usrlib
 # Flink requires these JARs to communicate with Kafka brokers and Cassandra clusters natively
 RUN wget -P /opt/flink/lib/ https://repo1.maven.org/maven2/org/apache/flink/flink-sql-connector-kafka/3.0.1-1.18/flink-sql-connector-kafka-3.0.1-1.18.jar && \
     wget -P /opt/flink/lib/ https://repo1.maven.org/maven2/org/apache/flink/flink-connector-cassandra_2.12/1.16.3/flink-connector-cassandra_2.12-1.16.3.jar
+
+# Copy the arrondissements GeoJSON into the container
+COPY arrondissements.geojson /opt/flink/usrlib/arrondissements.geojson
 
 # Set the working directory
 WORKDIR /opt/flink/bin
