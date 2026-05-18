@@ -17,7 +17,7 @@ import json
 import logging
 import os
 from pyflink.datastream import StreamExecutionEnvironment, CheckpointingMode
-from pyflink.datastream.connectors.kafka import KafkaSource, KafkaOffsetsInitializer
+from pyflink.datastream.connectors.kafka import KafkaSource, KafkaOffsetsInitializer, KafkaSink, KafkaRecordSerializationSchema
 from pyflink.common.watermark_strategy import WatermarkStrategy, TimestampAssigner
 from pyflink.common.serialization import SimpleStringSchema
 from pyflink.common.typeinfo import Types
@@ -159,6 +159,21 @@ class ProcessAndSaveGPS(MapFunction):
             # Normalize the UNIX epoch ms timestamp to UTC datetime
             dt = datetime.fromtimestamp(data['timestamp'] / 1000.0, tz=timezone.utc)
 
+            # # ── Step 3: Cassandra Sink ──
+            # self.session.execute(self.prepared_stmt, [
+            #     'casablanca',
+            #     zone_id,
+            #     zone_name,
+            #     dt,
+            #     str(data['taxi_id']),
+            #     lat,
+            #     lon,
+            #     float(data.get('speed', 0.0)),
+            #     str(data.get('status', 'available'))
+            # ])
+
+            # return f"SUCCESS: Taxi {data['taxi_id']} → {zone_name} (Zone {zone_id})"
+
             # ── Step 3: Cassandra Sink ──
             self.session.execute(self.prepared_stmt, [
                 'casablanca',
@@ -172,7 +187,12 @@ class ProcessAndSaveGPS(MapFunction):
                 str(data.get('status', 'available'))
             ])
 
-            return f"SUCCESS: Taxi {data['taxi_id']} → {zone_name} (Zone {zone_id})"
+            # Enrich original data or build a clean payload for Job 2
+            data['zone_id'] = zone_id
+            data['zone_name'] = zone_name
+
+            # Return a true JSON string so it passes your .startswith("{") filter!
+            return json.dumps(data)
 
         except Exception as e:
             return f"ERROR processing row: {str(e)}"
@@ -217,7 +237,20 @@ def main():
     # Print processing log to the TaskManager stdout
     result_stream.print()
 
-    # ── 7. Execute ──
+    # ── 7. Kafka Sink for processed.gps ──
+    kafka_sink = KafkaSink.builder() \
+        .set_bootstrap_servers("kafka:29092") \
+        .set_record_serializer(
+            KafkaRecordSerializationSchema.builder()
+                .set_topic("processed.gps")
+                .set_value_serialization_schema(SimpleStringSchema())
+                .build()
+        ) \
+        .build()
+        
+    result_stream.filter(lambda x: x.startswith("{")).sink_to(kafka_sink)
+
+    # ── 8. Execute ──
     env.execute("GPS Normalizer Job")
 
 

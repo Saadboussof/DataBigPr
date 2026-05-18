@@ -84,7 +84,7 @@ CREATE TABLE IF NOT EXISTS taasim.demand_zones (
   window_start      TIMESTAMP,
   active_vehicles   INT,        -- Supply: how many taxis are in this zone
   pending_requests  INT,        -- Demand: how many ride requests are pending
-  ratio             DOUBLE,     -- supply / demand (>1 = surplus, <1 = shortage)
+  ratio             DOUBLE,     -- demand intensity: pending_requests / max(active_vehicles, 1)
   forecast_demand   DOUBLE,     -- ML prediction for next 30 min (filled by Spark ML)
   PRIMARY KEY ((city, zone_id), window_start)
 ) WITH CLUSTERING ORDER BY (window_start DESC)
