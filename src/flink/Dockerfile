@@ -8,8 +8,8 @@ RUN apt-get update -y && \
     ln -s /usr/bin/python3.10 /usr/bin/python && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Install PyFlink, Cassandra Driver, and Shapely (for polygon zone lookup)
-RUN pip3 install --no-cache-dir apache-flink==1.18.0 cassandra-driver shapely
+# Install PyFlink and Python clients used by the Flink jobs
+RUN pip3 install --no-cache-dir apache-flink==1.18.0 cassandra-driver kafka-python-ng shapely
 
 # Create directories for external jars
 RUN mkdir -p /opt/flink/usrlib
@@ -24,3 +24,7 @@ COPY arrondissements.geojson /opt/flink/usrlib/arrondissements.geojson
 
 # Set the working directory
 WORKDIR /opt/flink/bin
+
+# Dans src/flink/Dockerfile
+RUN wget https://repo1.maven.org/maven2/org/apache/flink/flink-connector-cassandra_2.12/1.16.1/flink-connector-cassandra_2.12-1.16.1.jar -P /opt/flink/lib/
+RUN wget https://repo1.maven.org/maven2/io/dropwizard/metrics/metrics-core/3.2.6/metrics-core-3.2.6.jar -P /opt/flink/lib/

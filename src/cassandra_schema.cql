@@ -84,8 +84,32 @@ CREATE TABLE IF NOT EXISTS taasim.demand_zones (
   window_start      TIMESTAMP,
   active_vehicles   INT,        -- Supply: how many taxis are in this zone
   pending_requests  INT,        -- Demand: how many ride requests are pending
-  ratio             DOUBLE,     -- supply / demand (>1 = surplus, <1 = shortage)
+  ratio             DOUBLE,     -- demand intensity: pending_requests / max(active_vehicles, 1)
   forecast_demand   DOUBLE,     -- ML prediction for next 30 min (filled by Spark ML)
   PRIMARY KEY ((city, zone_id), window_start)
 ) WITH CLUSTERING ORDER BY (window_start DESC)
   AND default_time_to_live = 604800;  -- Auto-delete after 7 days
+
+-- ------------------------------------------------------------------------------
+-- Table 4: kpi_summary
+-- Stores batch-computed KPIs (written by Spark kpi_analytics.py).
+-- SEPARATE from demand_zones to avoid overwriting Flink Job 2's streaming data.
+--
+-- Partition Key: (city, zone_id)
+--   → Same pattern as other zone-keyed tables.
+--   → Query: "Show me all KPIs for Zone 7"
+--
+-- Clustering Key: window_start DESC
+--   → Most recent KPI computation first.
+-- ------------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS taasim.kpi_summary (
+  city                      TEXT,
+  zone_id                   INT,
+  window_start              TIMESTAMP,
+  total_trips               BIGINT,
+  avg_trip_duration_minutes DOUBLE,
+  peak_demand_hour          INT,
+  coverage_gap_demand       BIGINT,
+  PRIMARY KEY ((city, zone_id), window_start)
+) WITH CLUSTERING ORDER BY (window_start DESC)
+  AND default_time_to_live = 2592000;  -- 30 days (KPIs are semi-static)
