@@ -9,6 +9,7 @@ from pyflink.datastream.connectors.kafka import KafkaSource, KafkaOffsetsInitial
 from pyflink.datastream.window import TumblingEventTimeWindows
 from pyflink.common.watermark_strategy import TimestampAssigner
 from pyflink.datastream.functions import ProcessWindowFunction
+from pyflink.datastream.state_backend import EmbeddedRocksDBStateBackend
 
 # --- 1. Timestamp Assigners ---
 class GpsTimestampAssigner(TimestampAssigner):
@@ -73,7 +74,8 @@ class AggregateDemand(ProcessWindowFunction):
 def run_demand_aggregator_job():
     env = StreamExecutionEnvironment.get_execution_environment()
     env.set_parallelism(4)
-    env.enable_checkpointing(10000)
+    env.enable_checkpointing(60000)
+    env.set_state_backend(EmbeddedRocksDBStateBackend())
 
     # Kafka Sources
     gps_source = KafkaSource.builder() \
