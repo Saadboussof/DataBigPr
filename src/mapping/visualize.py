@@ -50,6 +50,27 @@ def create_map(parquet_path, num_trips=100, output_html="notebooks/casablanca_ta
         tiles="OpenStreetMap",
     )
 
+    # Add GeoJSON Arrondissements Overlay
+    geojson_path = os.path.join("data", "geo", "arrondissements.geojson")
+    if os.path.exists(geojson_path):
+        with open(geojson_path, 'r', encoding='utf-8') as f:
+            geo_data = json.load(f)
+
+        folium.GeoJson(
+            geo_data,
+            name="Arrondissements",
+            style_function=lambda feature: {
+                "fillColor": "#3186cc",
+                "color": "#3186cc",
+                "weight": 2,
+                "fillOpacity": 0.1,
+            },
+            tooltip=folium.GeoJsonTooltip(fields=["Arrondissement", "Prefecture"])
+        ).add_to(m)
+        print(f"Added GeoJSON boundaries from {geojson_path}")
+    else:
+        print(f"WARNING: GeoJSON not found at {geojson_path}")
+
     # Add each trip as a polyline
     for i, row in sample.iterrows():
         try:
