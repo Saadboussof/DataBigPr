@@ -124,7 +124,7 @@ services:
       - |
         FLINK_PROPERTIES=
         jobmanager.rpc.address: flink-jobmanager
-        taskmanager.numberOfTaskSlots: 7 
+        taskmanager.numberOfTaskSlots: 12 
     volumes:
       - ./src/flink:/opt/flink/usrlib
 
@@ -193,11 +193,40 @@ services:
       - "3000:3000"
     environment:
       GF_INSTALL_PLUGINS: hadesarchitect-cassandra-datasource
+      GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS: hadesarchitect-cassandra-datasource
       GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+      - ./src/grafana/provisioning:/etc/grafana/provisioning
+      - ./data/geo:/usr/share/grafana/public/maps/geo
     depends_on:
       - cassandra
+
+  # ── 9. FastAPI Backend (Soufiane) ──────────────────────────────────────
+  api:
+    build:
+      context: ./src/api
+      dockerfile: Dockerfile
+    container_name: taasim-api
+    ports:
+      - "8000:8000"
+    depends_on:
+      - kafka
+      - cassandra
+      - minio
+    volumes:
+      - ./data/geo:/app/geo
+    environment:
+      KAFKA_BROKER: kafka:29092
+      CASSANDRA_HOST: cassandra
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_ACCESS_KEY: admin
+      MINIO_SECRET_KEY: password
+      JWT_SECRET: taasim-super-secret-key-change-me-for-security
+      PYTHONPATH: /opt/spark/python:/opt/spark/python/lib/py4j-0.10.9.7-src.zip
+    restart: unless-stopped
 
 volumes:
   kafka_data:
   minio_data:
   cassandra_data:
+

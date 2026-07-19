@@ -23,7 +23,7 @@ RUN wget -P /opt/flink/lib/ https://repo1.maven.org/maven2/org/apache/flink/flin
 COPY arrondissements.geojson /opt/flink/usrlib/arrondissements.geojson
 
 # Set the working directory
-WORKDIR /opt/flink/bin
+# WORKDIR removed – default entrypoint works from /opt/flink
 
 # Dans src/flink/Dockerfile
 RUN wget https://repo1.maven.org/maven2/org/apache/flink/flink-connector-cassandra_2.12/1.16.1/flink-connector-cassandra_2.12-1.16.1.jar -P /opt/flink/lib/

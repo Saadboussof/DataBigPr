@@ -10,6 +10,7 @@ from pyflink.datastream.window import TumblingEventTimeWindows
 from pyflink.common.watermark_strategy import TimestampAssigner
 from pyflink.datastream.functions import ProcessWindowFunction
 from pyflink.datastream.state_backend import EmbeddedRocksDBStateBackend
+from cassandra.cluster import Cluster
 
 # --- 1. Timestamp Assigners ---
 class GpsTimestampAssigner(TimestampAssigner):

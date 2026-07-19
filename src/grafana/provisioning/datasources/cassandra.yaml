@@ -1,0 +1,11 @@
+apiVersion: 1
+
+datasources:
+  - name: "Cassandra-TaaSim"
+    type: "hadesarchitect-cassandra-datasource"
+    access: "proxy"
+    url: "cassandra:9042"
+    jsonData:
+      keyspace: "taasim"
+      consistency: "ONE"
+    isDefault: true

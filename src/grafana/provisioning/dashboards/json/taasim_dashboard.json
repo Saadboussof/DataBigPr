@@ -1,0 +1,355 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "liveNow": true,
+  "panels": [
+    {
+      "id": 1,
+      "title": "Total Trips Today",
+      "type": "stat",
+      "datasource": "Cassandra-TaaSim",
+      "gridPos": {
+        "h": 4,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": "Cassandra-TaaSim",
+          "queryType": "query",
+          "rawQuery": true,
+          "query": "SELECT count(*) as total_trips FROM trips WHERE city = 'casablanca' AND date_bucket = '$date_bucket';",
+          "target": "SELECT count(*) as total_trips FROM trips WHERE city = 'casablanca' AND date_bucket = '$date_bucket';"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      }
+    },
+    {
+      "id": 2,
+      "title": "Average Match ETA (Seconds)",
+      "type": "stat",
+      "datasource": "Cassandra-TaaSim",
+      "gridPos": {
+        "h": 4,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": "Cassandra-TaaSim",
+          "queryType": "query",
+          "rawQuery": true,
+          "query": "SELECT avg(eta_seconds) as avg_eta FROM trips WHERE city = 'casablanca' AND date_bucket = '$date_bucket';",
+          "target": "SELECT avg(eta_seconds) as avg_eta FROM trips WHERE city = 'casablanca' AND date_bucket = '$date_bucket';"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      }
+    },
+    {
+      "id": 3,
+      "title": "Real-Time Arrondissement Demand Heatmap",
+      "type": "table",
+      "datasource": "Cassandra-TaaSim",
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 0,
+        "y": 4
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": "Cassandra-TaaSim",
+          "queryType": "query",
+          "rawQuery": true,
+          "query": "SELECT zone_id, zone_name, ratio, active_vehicles, pending_requests, window_start FROM demand_zones WHERE city = 'casablanca' PER PARTITION LIMIT 1 ALLOW FILTERING;",
+          "target": "SELECT zone_id, zone_name, ratio, active_vehicles, pending_requests, window_start FROM demand_zones WHERE city = 'casablanca' PER PARTITION LIMIT 1 ALLOW FILTERING;"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": []
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*ratio.*"
+            },
+            "properties": [
+              {
+                "id": "custom.displayMode",
+                "value": "color-background"
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "yellow",
+                      "value": 0.8
+                    },
+                    {
+                      "color": "red",
+                      "value": 1.2
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "footer": {
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      }
+    },
+    {
+      "id": 4,
+      "title": "Live Active Taxis per Arrondissement",
+      "type": "bargauge",
+      "datasource": "Cassandra-TaaSim",
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 12,
+        "y": 4
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": "Cassandra-TaaSim",
+          "queryType": "query",
+          "rawQuery": true,
+          "query": "SELECT zone_name, active_vehicles FROM demand_zones WHERE city = 'casablanca' PER PARTITION LIMIT 1 ALLOW FILTERING;",
+          "target": "SELECT zone_name, active_vehicles FROM demand_zones WHERE city = 'casablanca' PER PARTITION LIMIT 1 ALLOW FILTERING;"
+        }
+      ],
+      "transformations": [],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "displayMode": "lcd",
+        "minMaxValues": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true
+      }
+    },
+    {
+      "id": 5,
+      "title": "Live Matched Trip Receipts",
+      "type": "table",
+      "datasource": "Cassandra-TaaSim",
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 14
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": "Cassandra-TaaSim",
+          "queryType": "query",
+          "rawQuery": true,
+          "query": "SELECT created_at, trip_id, rider_id, taxi_id, origin_zone, dest_zone, eta_seconds, status FROM trips WHERE city = 'casablanca' AND date_bucket = '$date_bucket' LIMIT 20;",
+          "target": "SELECT created_at, trip_id, rider_id, taxi_id, origin_zone, dest_zone, eta_seconds, status FROM trips WHERE city = 'casablanca' AND date_bucket = '$date_bucket' LIMIT 20;"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "displayMode": "auto"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "footer": {
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      }
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": true,
+          "value": "2026-06-20"
+        },
+        "hide": 0,
+        "label": "Date Bucket",
+        "name": "date_bucket",
+        "options": [
+          {
+            "selected": true,
+            "value": "2026-06-20"
+          }
+        ],
+        "query": "2026-06-20",
+        "type": "textbox"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": [
+      "5s",
+      "10s",
+      "30s",
+      "1m"
+    ]
+  },
+  "timezone": "browser",
+  "title": "TaaSim Casablanca Operations",
+  "uid": "taasim_dashboard",
+  "version": 14,
+  "weekStart": ""
+}
